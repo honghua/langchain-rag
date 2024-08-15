@@ -1,30 +1,35 @@
-# from langchain.document_loaders import DirectoryLoader
-from langchain_community.document_loaders import DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 import os
 import shutil
 
+from langchain.schema import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_core.documents import Document
+from pathlib import Path
+from typing import List
+
+from embeddings import get_embeddings
 
 CHROMA_PATH = "chroma"
-DATA_PATH = "data/books"
-
-
-def main():
-    generate_data_store()
+DATA_PATH = "data"
 
 
 def generate_data_store():
-    documents = load_documents()
+    documents = load_documents(Path(DATA_PATH))
     chunks = split_text(documents)
     save_to_chroma(chunks)
 
-
-def load_documents():
-    loader = DirectoryLoader(DATA_PATH, glob="*.md")
-    documents = loader.load()
+def load_documents(doc_dir: Path) -> List[Document]:
+    documents = []
+    for file_path in doc_dir.glob('*'):
+        if file_path.is_file():
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+                doc = Document(
+                    page_content=content,
+                    metadata={"source": str(file_path)}
+                )
+                documents.append(doc)
     return documents
 
 
@@ -50,14 +55,7 @@ def save_to_chroma(chunks: list[Document]):
     if os.path.exists(CHROMA_PATH):
         shutil.rmtree(CHROMA_PATH)
     
-    model_name = "BAAI/bge-large-en"
-    model_kwargs = {'device': 'cpu'}
-    encode_kwargs = {'normalize_embeddings': True}
-    hf = HuggingFaceBgeEmbeddings(
-        model_name=model_name,
-        model_kwargs=model_kwargs,
-        encode_kwargs=encode_kwargs
-    )
+    hf = get_embeddings()
 
     # Create a new DB from the documents.
     db = Chroma.from_documents(
@@ -66,6 +64,8 @@ def save_to_chroma(chunks: list[Document]):
     db.persist()
     print(f"Saved {len(chunks)} chunks to {CHROMA_PATH}.")
 
+def main():
+    generate_data_store()
 
 if __name__ == "__main__":
     main()

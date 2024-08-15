@@ -1,52 +1,60 @@
 import argparse
-# from dataclasses import dataclass
+import torch
+import transformers
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from embeddings import get_embeddings
 
 CHROMA_PATH = "chroma"
+MODEL_NAME = "BAAI/bge-large-en"
+DEVICE = 'cpu'
+LLM_MODEL_ID = "meta-llama/Meta-Llama-3.1-8B-Instruct"
 
-PROMPT_TEMPLATE = """
-Answer the question based only on the following context:
+def search_db(db, query_text, k=3, score_threshold=0.7):
+    results = db.similarity_search_with_relevance_scores(query_text, k=k)
+    if not results or results[0][1] < score_threshold:
+        return None
+    return results
 
-{context}
+def format_context(results):
+    return "\n\n---\n\n".join([doc.page_content for doc, _score in results])
 
----
-
-Answer the question based on the above context: {question}
-"""
-
+def format_output(response_text, sources):
+    return f"Response: {response_text}\nSources: {sources}"
 
 def main():
-    # Create CLI.
     parser = argparse.ArgumentParser()
     parser.add_argument("query_text", type=str, help="The query text.")
     args = parser.parse_args()
-    query_text = args.query_text
 
-    # Prepare the DB.
-    embedding_function = OpenAIEmbeddings()
+    embedding_function = get_embeddings()
     db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+    results = search_db(db, args.query_text)
 
-    # Search the DB.
-    results = db.similarity_search_with_relevance_scores(query_text, k=3)
-    if len(results) == 0 or results[0][1] < 0.7:
-        print(f"Unable to find matching results.")
+    if results is None:
+        print("Unable to find matching results.")
         return
 
-    context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
-    prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    prompt = prompt_template.format(context=context_text, question=query_text)
-    print(prompt)
+    context_text = format_context(results)
+    messages = [
+        {"role": "system", "content": f"Answer the question based only on the following context: {context_text}"}, 
+        {"role": "user", "content": args.query_text},
+    ]
+    print("context:\n", context_text)
 
-    model = ChatOpenAI()
-    response_text = model.predict(prompt)
+    pipeline = transformers.pipeline(
+        "text-generation",
+        model=LLM_MODEL_ID,
+        model_kwargs={"torch_dtype": torch.bfloat16},
+        device_map="auto",
+    )
+    outputs = pipeline(messages, max_new_tokens=256)
+    response_text = outputs[0]["generated_text"][-1]["content"]
+    print(response_text)
 
     sources = [doc.metadata.get("source", None) for doc, _score in results]
-    formatted_response = f"Response: {response_text}\nSources: {sources}"
+    formatted_response = format_output(response_text, sources)
     print(formatted_response)
-
 
 if __name__ == "__main__":
     main()

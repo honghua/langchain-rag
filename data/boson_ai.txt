@@ -1,0 +1,12 @@
+At Boson AI, we are working on intelligent agents that can serve as human companions and helpers. Today, we are excited to share Higgs-Llama-3-70B-v2, a new model that significantly improves upon its predecessor. It narrows the gap to the very best proprietary models on benchmarks relevant for dialog, interaction and understanding. Arena-Hard and AlpacaEval 2.0 measure the general intelligence of LLMs and correlate well with human preference. MMLU-Pro is a recent benchmark that measures LLM’s knowledge and reasoning capability.
+
+Higgs-v2
+
+Partnering with the roleplay community we collected 6.2M dialogues in a 2-week A/B test. This allowed us to evaluate Higgs v2 directly against other models. Compared to Claude 3.5 Sonnet, Higgs v2 reduces the response regeneration rate1 by 21.6%. This rate matters as it directly relates to the cases where users are unhappy with the generated result. Moreover, it increases the day 1 retention rate2 by 5.3%.
+
+Much of the performance boost of Higgs v2 comes from an improved judging system, which guides the model alignment through synthetic feedback signals. We built an in-house LLM reward model, named Higgs Judger, to evaluate model outputs. On Reward Bench, Higgs Judger ties with the best generative judger, Google’s Gemini 1.5 Pro, in the leaderboard.
+
+In addition, this judger model learns the preference of players during roleplays, using the the feedback that the user provides.
+
+What’s Next?
+We are conducting more evaluations before the final release. If you would like to access Higgs v2 early or do customization, please contact us at api@boson.ai.

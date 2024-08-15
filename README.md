@@ -1,26 +1,18 @@
-# Langchain RAG Tutorial
+# RAG demo with Llama3
+
+## Prerequisite
+You'll need to set up an Huggingface account to download LLama model from transformers
+
 
 ## Install dependencies
 
-1. Do the following before installing the dependencies found in `requirements.txt` file because of current challenges installing `onnxruntime` through `pip install onnxruntime`. 
-
-    - For MacOS users, a workaround is to first install `onnxruntime` dependency for `chromadb` using:
+1. Now run this command to install dependenies in the `requirements.txt` file. 
 
     ```python
-     conda install onnxruntime -c conda-forge
+    pip install -r requirements.txt
     ```
-    See this [thread](https://github.com/microsoft/onnxruntime/issues/11037) for additonal help if needed. 
 
-     - For Windows users, follow the guide [here](https://github.com/bycloudai/InstallVSBuildToolsWindows?tab=readme-ov-file) to install the Microsoft C++ Build Tools. Be sure to follow through to the last step to set the enviroment variable path.
-
-
-2. Now run this command to install dependenies in the `requirements.txt` file. 
-
-```python
-pip install -r requirements.txt
-```
-
-3. Install markdown depenendies with: 
+1. Install markdown depenendies with: 
 
 ```python
 pip install "unstructured[md]"
@@ -42,6 +34,22 @@ Query the Chroma DB.
 python query_data.py "How does Alice meet the Mad Hatter?"
 ```
 
-> You'll also need to set up an OpenAI account (and set the OpenAI key in your environment variable) for this to work.
+Alice meets the Mad Hatter through the Cat,
+who initially introduces her to both the Hatter and the March Hare.
+The Cat tells Alice that the Hatter lives in one direction and the March Hare lives in another,
+and invites her to visit either of them, as they are both mad.
 
-Here is a step-by-step tutorial video: [RAG+Langchain Python Project: Easy AI/Chat For Your Docs](https://www.youtube.com/watch?v=tcqEUSNCn8I&ab_channel=pixegami).
+```python
+python query_data.py "Where is 2024 Olympics hosted?"
+```
+
+The 2024 Summer Olympics will be held in Paris, France, as well as a few other cities in France.
+
+
+```python
+python query_data.py "What is Boson AI"
+```
+
+Based on the provided context, Boson AI appears to be a company working on developing intelligent agents that can serve as human companions and helpers. They are specifically focused on creating advanced language models, such as Higgs-Llama-3-70B-v2, which is a new model designed to improve upon its predecessor and narrow the gap to the best proprietary models in relevant benchmarks.
+Response: Based on the provided context, Boson AI appears to be a company working on developing intelligent agents that can serve as human companions and helpers. They are specifically focused on creating advanced language models, such as Higgs-Llama-3-70B-v2, which is a new model designed to improve upon its predecessor and narrow the gap to the best proprietary models in relevant benchmarks.
+
