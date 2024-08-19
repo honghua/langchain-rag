@@ -37,21 +37,20 @@ class QueryProcessor:
     def process_query(self, query_text):
         results = self.search_db(query_text)
         if results is None:
-            print("Unable to find matching results.")
-            return
+            return "Unable to find matching results."
 
         context_text = self.format_context(results)
         messages = [
             {"role": "system", "content": f"Answer the question based only on the following context: {context_text}"}, 
             {"role": "user", "content": query_text},
         ]
-        print("context:\n", context_text)
 
         outputs = self.pipeline(messages, max_new_tokens=256)
         response_text = outputs[0]["generated_text"][-1]["content"]
-        print(response_text)
 
         sources = [doc.metadata.get("source", None) for doc, _score in results]
         formatted_response = self.format_output(response_text, sources)
+        print("context:\n", context_text)
         print(formatted_response)
+        return response_text
 
