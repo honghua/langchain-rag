@@ -3,6 +3,11 @@
 ## Prerequisite
 You'll need to set up an Huggingface account to download LLama model from transformers
 
+```
+pip install -U "huggingface_hub[cli]"
+
+huggingface-cli login
+```
 
 ## Install dependencies
 
